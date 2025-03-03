@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生命进度条</title>
+    <title>人生进度</title>
     <style>
         body {
             font-family: 'Microsoft YaHei', sans-serif;
@@ -23,6 +23,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         
         h1 {
@@ -48,6 +49,11 @@
             box-sizing: border-box;
         }
         
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
         button {
             background-color: #3498db;
             color: white;
@@ -55,36 +61,56 @@
             padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
-            width: 100%;
             font-size: 16px;
-            margin-top: 10px;
+            flex: 1;
         }
         
         button:hover {
             background-color: #2980b9;
         }
         
-        .result {
-            margin-top: 20px;
-            display: none;
+        button.add-btn {
+            background-color: #2ecc71;
         }
         
-        .countdown {
-            text-align: center;
+        button.add-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .result-container {
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        .progress-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .progress-title {
+            font-size: 18px;
+            font-weight: bold;
             color: #2c3e50;
         }
         
-        .countdown-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .countdown-timer {
-            font-size: 24px;
-            font-weight: bold;
-            font-family: monospace;
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
         }
         
         .progress-container {
@@ -92,46 +118,64 @@
             background-color: #f3f3f3;
             border-radius: 5px;
             overflow: hidden;
-            margin-bottom: 10px;
+            height: 30px;
+            position: relative;
         }
         
         .progress-bar {
-            height: 30px;
+            height: 100%;
             background-color: #27ae60;
             width: 0;
             transition: width 0.5s;
-            position: relative;
         }
         
         .progress-text {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            text-align: center;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
             font-weight: bold;
-            line-height: 30px;
             text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            z-index: 1;
         }
         
-        .info {
-            margin-top: 15px;
+        .progress-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .no-results {
             text-align: center;
+            color: #7f8c8d;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
         .time-unit {
-            display: inline-block;
-            margin: 0 5px;
+            background-color: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
             text-align: center;
+            min-width: 60px;
         }
         
         .time-value {
-            font-size: 28px;
-            background-color: #2c3e50;
-            color: white;
-            padding: 5px 8px;
-            border-radius: 5px;
-            min-width: 40px;
-            display: inline-block;
+            font-size: 18px;
+            font-weight: bold;
         }
         
         .time-label {
@@ -142,22 +186,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>生命进度条</h1>
+        <h1>人生进度</h1>
         
         <div class="form-group">
-            <label for="name">姓名：</label>
-            <input type="text" id="name" placeholder="请输入您的姓名" required>
+            <label for="name">他是谁：</label>
+            <input type="text" id="name" placeholder="请输入姓名" required>
         </div>
         
         <div class="form-group">
-            <label for="birthdate">出生日期：</label>
-            <input type="date" id="birthdate" value="1970-01-01" required>
+            <label for="birthYear">出生年份：</label>
+            <input type="number" id="birthYear" min="1900" max="2023" value="1990" required>
         </div>
         
         <div class="form-group">
-            <label for="country">国家：</label>
+            <label for="country">所在国家：</label>
             <select id="country" required>
-                <option value="">请选择国家</option>
                 <option value="中国" selected>中国</option>
                 <option value="日本">日本</option>
                 <option value="美国">美国</option>
@@ -172,43 +215,13 @@
             </select>
         </div>
         
-        <button onclick="calculateProgress()">计算生命进度</button>
-        
-        <div class="result" id="result">
-            <div class="countdown">
-                <div class="countdown-title">生命倒计时</div>
-                <div class="countdown-timer" id="countdown">
-                    <div class="time-unit">
-                        <span class="time-value" id="days">00</span>
-                        <div class="time-label">天</div>
-                    </div>
-                    <div class="time-unit">
-                        <span class="time-value" id="hours">00</span>
-                        <div class="time-label">时</div>
-                    </div>
-                    <div class="time-unit">
-                        <span class="time-value" id="minutes">00</span>
-                        <div class="time-label">分</div>
-                    </div>
-                    <div class="time-unit">
-                        <span class="time-value" id="seconds">00</span>
-                        <div class="time-label">秒</div>
-                    </div>
-                    <div class="time-unit">
-                        <span class="time-value" id="milliseconds">000</span>
-                        <div class="time-label">毫秒</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-text" id="progressText"></div>
-                </div>
-            </div>
-            
-            <div class="info" id="info"></div>
+        <div class="button-group">
+            <button class="add-btn" onclick="addPerson()">新增</button>
         </div>
+    </div>
+    
+    <div id="resultContainer" class="result-container">
+        <!-- 进度条将在这里动态添加 -->
     </div>
     
     <script>
@@ -227,75 +240,182 @@
             "印度": 69.7
         };
         
-        let countdownInterval;
-        let birthDate;
-        let expectedDeathDate;
+        // 存储人员信息的数组
+        let people = [];
         
-        // 更新倒计时
-        function updateCountdown() {
-            const now = new Date();
-            const timeRemaining = expectedDeathDate - now;
-            
-            // 如果时间已经到了或者过了
-            if (timeRemaining <= 0) {
-                clearInterval(countdownInterval);
-                document.getElementById('days').textContent = '00';
-                document.getElementById('hours').textContent = '00';
-                document.getElementById('minutes').textContent = '00';
-                document.getElementById('seconds').textContent = '00';
-                document.getElementById('milliseconds').textContent = '000';
-                return;
-            }
-            
-            // 计算剩余的天、时、分、秒、毫秒
-            const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-            const milliseconds = timeRemaining % 1000;
-            
-            // 更新显示
-            document.getElementById('days').textContent = String(days).padStart(2, '0');
-            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-            document.getElementById('milliseconds').textContent = String(milliseconds).padStart(3, '0');
-        }
+        // 存储倒计时间隔的对象
+        let countdownIntervals = {};
         
-        // 计算生命进度
-        function calculateProgress() {
+        // 添加人员信息（新增按钮功能）
+        function addPerson() {
             const name = document.getElementById('name').value;
-            const birthdateValue = document.getElementById('birthdate').value;
+            const birthYear = parseInt(document.getElementById('birthYear').value);
             const country = document.getElementById('country').value;
             
-            if (!name || !birthdateValue || !country) {
-                alert('请填写所有信息！');
+            // 验证输入
+            if (!name) {
+                alert('请输入姓名！');
                 return;
             }
             
-            // 显示结果区域
-            document.getElementById('result').style.display = 'block';
-            
-            // 清除之前的倒计时
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
+            const currentYear = new Date().getFullYear();
+            if (isNaN(birthYear) || birthYear < 1900 || birthYear > currentYear) {
+                alert(`请输入有效的出生年份（1900-${currentYear}）！`);
+                return;
             }
             
-            // 设置出生日期和预期死亡日期
-            birthDate = new Date(birthdateValue);
+            if (!country) {
+                alert('请选择国家！');
+                return;
+            }
+            
+            // 创建新的人员对象
+            const person = {
+                id: Date.now().toString(), // 使用时间戳作为唯一ID
+                name: name,
+                birthYear: birthYear,
+                country: country
+            };
+            
+            // 添加到数组
+            people.push(person);
+            
+            // 创建并添加新的进度条
+            createProgressItem(person);
+            
+            // 显示结果容器
+            document.getElementById('resultContainer').style.display = 'block';
+        }
+        
+        // 创建进度条项
+        function createProgressItem(person) {
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // 创建进度条项
+            const progressItem = document.createElement('div');
+            progressItem.className = 'progress-item';
+            progressItem.id = `item_${person.id}`;
+            
+            // 创建标题和删除按钮
+            const header = document.createElement('div');
+            header.className = 'progress-header';
+            
+            const title = document.createElement('div');
+            title.className = 'progress-title';
+            title.textContent = person.name;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = '删除';
+            deleteBtn.onclick = function() {
+                deletePerson(person.id);
+            };
+            
+            header.appendChild(title);
+            header.appendChild(deleteBtn);
+            
+            // 创建倒计时
+            const countdown = document.createElement('div');
+            countdown.className = 'countdown';
+            
+            // 创建时间单位
+            const timeUnits = ['days', 'hours', 'minutes', 'seconds'];
+            const timeLabels = ['天', '时', '分', '秒'];
+            
+            timeUnits.forEach((unit, index) => {
+                const timeUnit = document.createElement('div');
+                timeUnit.className = 'time-unit';
+                
+                const timeValue = document.createElement('span');
+                timeValue.className = 'time-value';
+                timeValue.id = `${unit}_${person.id}`;
+                timeValue.textContent = '00';
+                
+                const timeLabel = document.createElement('div');
+                timeLabel.className = 'time-label';
+                timeLabel.textContent = timeLabels[index];
+                
+                timeUnit.appendChild(timeValue);
+                timeUnit.appendChild(timeLabel);
+                countdown.appendChild(timeUnit);
+            });
+            
+            // 创建进度条容器
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'progress-container';
+            
+            // 创建进度条
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            progressBar.id = `progress_${person.id}`;
+            
+            // 创建进度文本
+            const progressText = document.createElement('div');
+            progressText.className = 'progress-text';
+            progressText.id = `progressText_${person.id}`;
+            
+            // 创建进度信息
+            const progressInfo = document.createElement('div');
+            progressInfo.className = 'progress-info';
+            progressInfo.id = `progressInfo_${person.id}`;
+            
+            // 组装进度条
+            progressContainer.appendChild(progressBar);
+            progressContainer.appendChild(progressText);
+            
+            // 组装进度条项
+            progressItem.appendChild(header);
+            progressItem.appendChild(countdown);
+            progressItem.appendChild(progressContainer);
+            progressItem.appendChild(progressInfo);
+            
+            // 添加到结果容器
+            resultContainer.appendChild(progressItem);
+            
+            // 计算并更新进度
+            calculateProgress(person);
+        }
+        
+        // 删除人员信息
+        function deletePerson(id) {
+            // 清除倒计时间隔
+            if (countdownIntervals[id]) {
+                clearInterval(countdownIntervals[id]);
+                delete countdownIntervals[id];
+            }
+            
+            // 查找索引
+            const index = people.findIndex(person => person.id === id);
+            
+            // 如果找到了
+            if (index !== -1) {
+                // 从数组中删除
+                people.splice(index, 1);
+                
+                // 从DOM中删除
+                const item = document.getElementById(`item_${id}`);
+                if (item) {
+                    item.remove();
+                }
+                
+                // 如果没有数据了，隐藏结果容器
+                if (people.length === 0) {
+                    document.getElementById('resultContainer').style.display = 'none';
+                }
+            }
+        }
+        
+        // 计算人生进度
+        function calculateProgress(person) {
+            // 设置出生日期（使用年份的1月1日作为简化）
+            const birthDate = new Date(person.birthYear, 0, 1);
+            const now = new Date();
             
             // 计算预期寿命（毫秒）
-            const lifeExpectancyInMs = lifeExpectancy[country] * 365.25 * 24 * 60 * 60 * 1000;
+            const lifeExpectancyInMs = lifeExpectancy[person.country] * 365.25 * 24 * 60 * 60 * 1000;
             
             // 计算预期死亡日期
-            expectedDeathDate = new Date(birthDate.getTime() + lifeExpectancyInMs);
-            
-            // 开始倒计时
-            updateCountdown();
-            countdownInterval = setInterval(updateCountdown, 10); // 每10毫秒更新一次
-            
-            // 计算生命进度
-            const now = new Date();
+            const expectedDeathDate = new Date(birthDate.getTime() + lifeExpectancyInMs);
             
             // 计算已经过的时间（毫秒）
             const livedTime = now - birthDate;
@@ -304,8 +424,8 @@
             const progressPercentage = (livedTime / lifeExpectancyInMs) * 100;
             
             // 更新进度条
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
+            const progressBar = document.getElementById(`progress_${person.id}`);
+            const progressText = document.getElementById(`progressText_${person.id}`);
             
             // 限制进度条最大值为100%
             const cappedProgress = Math.min(progressPercentage, 100);
@@ -316,15 +436,14 @@
             const yearsLived = livedTime / (365.25 * 24 * 60 * 60 * 1000);
             
             // 计算剩余的年数
-            const yearsRemaining = Math.max(0, lifeExpectancy[country] - yearsLived);
+            const yearsRemaining = Math.max(0, lifeExpectancy[person.country] - yearsLived);
             
             // 更新信息
-            const info = document.getElementById('info');
-            info.innerHTML = `
-                <p><strong>${name}</strong>，您已经度过了 <strong>${yearsLived.toFixed(2)}</strong> 年的生命。</p>
-                <p>根据${country}的平均寿命 <strong>${lifeExpectancy[country]}</strong> 年计算，</p>
-                <p>您还有约 <strong>${yearsRemaining.toFixed(2)}</strong> 年的生命旅程。</p>
-                <p>珍惜每一天，活在当下！</p>
+            const progressInfo = document.getElementById(`progressInfo_${person.id}`);
+            progressInfo.innerHTML = `
+                出生于${person.birthYear}年，已度过${yearsLived.toFixed(1)}年，
+                根据${person.country}平均寿命${lifeExpectancy[person.country]}年计算，
+                还有约${yearsRemaining.toFixed(1)}年
             `;
             
             // 根据进度调整进度条颜色
@@ -335,6 +454,46 @@
             } else {
                 progressBar.style.backgroundColor = '#e74c3c'; // 红色
             }
+            
+            // 更新倒计时
+            updateCountdown(person.id, expectedDeathDate);
+            
+            // 设置定时更新
+            if (countdownIntervals[person.id]) {
+                clearInterval(countdownIntervals[person.id]);
+            }
+            
+            countdownIntervals[person.id] = setInterval(function() {
+                updateCountdown(person.id, expectedDeathDate);
+            }, 1000);
+        }
+        
+        // 更新倒计时
+        function updateCountdown(personId, expectedDeathDate) {
+            const now = new Date();
+            const timeRemaining = expectedDeathDate - now;
+            
+            // 如果时间已经到了或者过了
+            if (timeRemaining <= 0) {
+                clearInterval(countdownIntervals[personId]);
+                document.getElementById(`days_${personId}`).textContent = '00';
+                document.getElementById(`hours_${personId}`).textContent = '00';
+                document.getElementById(`minutes_${personId}`).textContent = '00';
+                document.getElementById(`seconds_${personId}`).textContent = '00';
+                return;
+            }
+            
+            // 计算剩余的天、时、分、秒
+            const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+            
+            // 更新显示
+            document.getElementById(`days_${personId}`).textContent = String(days).padStart(2, '0');
+            document.getElementById(`hours_${personId}`).textContent = String(hours).padStart(2, '0');
+            document.getElementById(`minutes_${personId}`).textContent = String(minutes).padStart(2, '0');
+            document.getElementById(`seconds_${personId}`).textContent = String(seconds).padStart(2, '0');
         }
     </script>
 </body>
